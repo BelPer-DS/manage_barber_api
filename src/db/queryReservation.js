@@ -1,0 +1,5 @@
+export const queryReservation = {
+    CREATED_RESERVATION : "insert into reservations(date, start_time, end_time,id_customer,id_subsidiary, id_employee) values (?,?,?,?,?,?);",
+    VALIDATE_RESERVATION : "select id_reservation from reservations where (date = ?) and ((start_time >= ? and start_time <  ?) or (end_time > ? and end_time < ?) or (start_time < ? and end_time > ?));",
+    FIND_BY_SUBSIDIARY : "select date, start_time, end_time, cu.id_customer, cu.name, cu.last_name as customer_name, cu.alias_name as customer_last_name, em.id_employee, em.name as employee_name, em.last_name as employee_last_name, su.id_subsidiary, su.name as subsidiary_name from reservations as re inner join customers as cu on re.id_customer = cu.id_customer inner join employees as em on re.id_employee = em.id_employee inner join subsidiaries as su on re.id_subsidiary = su.id_subsidiary where date = ? and su.id_subsidiary = ? order by start_time;"
+} 
