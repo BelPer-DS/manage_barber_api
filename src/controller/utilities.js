@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import cryptoJs from 'crypto-js';
 import { v4 as uuidv4 } from 'uuid';
-import {} from 'qrcode'
+import QRCode from 'qrcode';
 //import qrcode
 
 const ENCRYPTION_KEY = 'B4rb3r_T3st1ng';
@@ -78,8 +78,19 @@ const setDate = (date) => {
     }
 }
 
-const generateQr = (value) => {
-
+const formatUrl = (value) => {
+    const resp = encodeURIComponent(value);//.replaceAll("/", "%252F");
+    console.log('formatUrl: ',resp);
+    return resp;
 }
 
-export {randomNumberCode, hashing, compareHash, encryption, decrypted, randomQrId, setDatetime, setDate}
+const generateQr = async (value) => {
+    const imgUrl = await QRCode.toDataURL(value);
+    return imgUrl;
+}
+
+const blodToImgBase64 = async (valueBlob) => {
+    const imgBase64 = await new Response(valueBlob).text();
+    return imgBase64;
+}
+export {randomNumberCode, hashing, compareHash, encryption, decrypted, randomQrId, setDatetime, setDate, generateQr, blodToImgBase64, formatUrl}

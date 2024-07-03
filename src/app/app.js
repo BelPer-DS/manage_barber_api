@@ -16,12 +16,6 @@ app.get('/',(req, res) => {
     res.send('Welcome')
 });
 
-try{
-    console.log("Connected database ...");
-}catch(err){
-    console.log("Error connect");
-}
-
 //Router by Managment
 app.use(URI + '/management', routerManagement);
 

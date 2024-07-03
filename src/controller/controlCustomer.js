@@ -1,7 +1,8 @@
 import {conn} from '../db/connect.js';
 import { httpstatus } from "../enums/http-status.js";
+import {status} from '../enums/status-enum.js';
 import { queryCustomer } from '../db/queryCustomer.js';
-import { hashing, encryption, decrypted, randomQrId, compareHash } from './utilities.js';
+import { hashing, encryption, decrypted, randomQrId, compareHash, generateQr, blodToImgBase64, formatUrl} from './utilities.js';
 
 const createCustomer = async (req,res) => {
     const{name, last_name, alias_name, phone_number, mail, pass} = req.body;
@@ -10,15 +11,22 @@ const createCustomer = async (req,res) => {
     }
 
     try{
+        
         await conn.beginTransaction();
         const passEncrpypted = await hashing(pass);
-        const qrId = await randomQrId();
+
+        const encrypt = await encryption(phone_number);
+        const qrCode = await generateQr(formatUrl(encrypt));
+        const[respInsQr] = await conn.query(queryCustomer.CREATED_QR_IMG,[('qr_user_id_'+phone_number),'image/png',qrCode,status.ACIVE]);
+        const idQrImg = respInsQr.insertId;
 
         const[respInsert] = await conn.query(queryCustomer.CREATED_CUSTOMER,
-            [name, last_name, alias_name, phone_number, mail, passEncrpypted]);
+            [name, last_name, alias_name, phone_number, mail, passEncrpypted,idQrImg]);
         
-        const encrypt = await encryption(phone_number);
+        const[[respQrPath]] = await conn.query(queryCustomer.FIND_QR_IMG,[idQrImg]);        
         
+        const imgB64 = await blodToImgBase64(respQrPath.path);
+        console.log("-----------------------> IMG \n", imgB64);
         let resp = {
             customer_id : respInsert.insertId,
             code : encrypt
@@ -27,7 +35,7 @@ const createCustomer = async (req,res) => {
         res.status(201).json(resp);
     }catch(er){
         conn.rollback();            
-        console.log("Error in create: ",er.sqlMessage);
+        console.log("Error in create: ",er);
         if(er.code == 'ER_DUP_ENTRY'){
             res.status(409).json(httpstatus.S_409_CONFLICT_EXIST);
         }else{
@@ -38,7 +46,8 @@ const createCustomer = async (req,res) => {
 }
 
 const getCustomerByCode = async (req, res) => {
-    const code = req.params.code;
+    const code = decodeURIComponent(req.params.code);
+    console.log("InApi",code);
     if(code == null){
         res.status(400).json(httpstatus.S_400_BAD_REQUEST);
         return;

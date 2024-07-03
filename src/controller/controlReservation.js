@@ -2,7 +2,7 @@ import {conn} from '../db/connect.js';
 import {status} from '../enums/status-enum.js';
 import {httpstatus} from '../enums/http-status.js';
 import {queryReservation} from '../db/queryReservation.js';
-import { setDatetime, setDate } from './utilities.js';
+import { setDatetime, setDate, generateQr } from './utilities.js';
 import * as _ from 'underscore'
 const createReservation = async(req, res) => {
     const {id_customer, id_subsidiary, id_employee, date, start_time, end_time, id_service, services} = req.body;
@@ -43,6 +43,7 @@ const createReservation = async(req, res) => {
 const getListReservationBySubsidiary = async (req, res) => {
     const subsidiary = req.query.subsidiary;
     const reservationDate = req.query.date;
+    
     const validationDate = setDate(req.query.date);
     try{
         if(validationDate==null){
