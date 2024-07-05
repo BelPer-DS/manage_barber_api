@@ -3,6 +3,11 @@ import {status} from '../enums/status-enum.js';
 import {httpstatus} from '../enums/http-status.js';
 import {queryManagment} from '../db/queryManagment.js';
 import { randomNumberCode, hashing, compareHash } from './utilities.js';
+import jwt from 'jsonwebtoken';
+import moment from 'moment';
+import { configDotenv } from "dotenv";
+configDotenv();
+const { sign } = jwt;
 
 const createManagment = async (req, resp) => { 
     const {name, last_name, role, phone_number, mail, pass} = req.body;
@@ -43,7 +48,14 @@ const loginManagment = async (req,res) => {
         const match = await compareHash(pass, access.access_code);
         if(match){
             const [[employee]] = await conn.query(queryManagment.FIND_BY_ACCOUNT_ID,[user]);
-            res.status(200).json(employee);            
+            //Logica para implementar JWT
+            const payload = {
+                iat: moment().unix(),
+                exp: moment().add(30,'m').unix(),
+                employee: employee
+            }
+            const token = sign(payload,process.env.SCRT_KEY);
+            res.status(200).json({token});            
             await conn.commit();
         } else {
             await conn.rollback();

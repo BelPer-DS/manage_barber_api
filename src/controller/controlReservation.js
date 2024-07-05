@@ -43,7 +43,7 @@ const createReservation = async(req, res) => {
 const getListReservationBySubsidiary = async (req, res) => {
     const subsidiary = req.query.subsidiary;
     const reservationDate = req.query.date;
-    
+
     const validationDate = setDate(req.query.date);
     try{
         if(validationDate==null){
@@ -51,6 +51,24 @@ const getListReservationBySubsidiary = async (req, res) => {
             return;
         }
         const [respQuery] = await conn.query(queryReservation.FIND_BY_SUBSIDIARY,[reservationDate,subsidiary]);
+        res.status(200).json(respQuery);
+    }catch(er){
+        res.status(500).send('Error...');
+        console.log("Error: ", er); 
+    }
+} 
+
+const getListReservationByCustomer = async (req, res) => {
+    const customer = req.query.customer;
+    const reservationDate = req.query.date;
+    
+    const validationDate = setDate(req.query.date);
+    try{
+        if(validationDate==null){
+            res.status(400).json(httpstatus.S_400_BAD_REQUEST);
+            return;
+        }
+        const [respQuery] = await conn.query(queryReservation.FIND_BY_CUSTOMER,[reservationDate,customer]);
         res.status(200).json(respQuery);
     }catch(er){
         res.status(500).send('Error...');
@@ -69,4 +87,4 @@ async function isAvailable(date, startTime, endTime){
     }
 }
 
-export {createReservation, getListReservationBySubsidiary}
+export {createReservation, getListReservationBySubsidiary, getListReservationByCustomer}

@@ -3,6 +3,11 @@ import { httpstatus } from "../enums/http-status.js";
 import {status} from '../enums/status-enum.js';
 import { queryCustomer } from '../db/queryCustomer.js';
 import { hashing, encryption, decrypted, randomQrId, compareHash, generateQr, blodToImgBase64, formatUrl} from './utilities.js';
+import jwt from 'jsonwebtoken';
+import moment from 'moment';
+import { configDotenv } from "dotenv";
+configDotenv();
+const { sign } = jwt;
 
 const createCustomer = async (req,res) => {
     const{name, last_name, alias_name, phone_number, mail, pass} = req.body;
@@ -47,7 +52,7 @@ const createCustomer = async (req,res) => {
 
 const getCustomerByCode = async (req, res) => {
     const code = decodeURIComponent(req.params.code);
-    console.log("InApi",code);
+    console.log("code: ", code);
     if(code == null){
         res.status(400).json(httpstatus.S_400_BAD_REQUEST);
         return;
@@ -77,8 +82,14 @@ const loginCustomer = async (req, res) => {
             const match = await compareHash(code, access.access_code);
             if(access!=null && match){
                 const [[customer]] = await conn.query(queryCustomer.FIND_BY_ID,[access.id_customer]);
-                console.log("Customer", customer );
-                res.status(200).json(customer);
+                //Logica para implementar JWT
+                const payload = {
+                    iat: moment().unix(),
+                    exp: moment().add(30,'m').unix(),
+                    customer: customer
+                }
+                const token = sign(payload,process.env.SCRT_KEY);
+                res.status(200).json({token});
             }else{
                 res.status(401).json(httpstatus.S_401_UNAUTHORIZED);
                 return;
@@ -91,6 +102,7 @@ const loginCustomer = async (req, res) => {
         console.log(er);
         res.status(500).json(httpstatus.S_500_ERROR);        
     }
+    
     
 }
 

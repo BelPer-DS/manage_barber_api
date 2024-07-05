@@ -4,6 +4,8 @@ import {routerCustomer} from '../router/routerCustomer.js';
 import { routerCompany } from "../router/routerCompany.js";
 import morgan from 'morgan';
 import { routerReservation } from "../router/routerReservation.js";
+import { configDotenv } from "dotenv";
+configDotenv();
 
 const app = express();
 const port = process.env.PORT || 3000;

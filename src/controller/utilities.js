@@ -2,9 +2,11 @@ import bcrypt from 'bcrypt';
 import cryptoJs from 'crypto-js';
 import { v4 as uuidv4 } from 'uuid';
 import QRCode from 'qrcode';
+import { configDotenv } from "dotenv";
+configDotenv();
 //import qrcode
 
-const ENCRYPTION_KEY = 'B4rb3r_T3st1ng';
+const ENCRYPTION_KEY = process.env.SCRT_KEY;
 
 const randomNumberCode = (size) => {
     const chars = '0123456789';
