@@ -1,7 +1,7 @@
 import express from "express";
 export const routerCustomer = express.Router();
 import {createCustomer, getCustomerByCode, loginCustomer} from "../controller/controlCustomer.js";
-import {authenticator} from './middleware.js';
+import {authenticator} from './authenticator.js';
 
 routerCustomer.post("/createCustomer", createCustomer);
 

@@ -5,6 +5,10 @@ import { routerCompany } from "../router/routerCompany.js";
 import morgan from 'morgan';
 import { routerReservation } from "../router/routerReservation.js";
 import { configDotenv } from "dotenv";
+import { startingWatsapp,sendMessage } from "../controller/middleware-whatsapp.js";
+import { routerMiddleware } from "../router/routerMiddleware.js";
+//import qrcode from "qrcode-terminal";
+
 configDotenv();
 
 const app = express();
@@ -30,6 +34,10 @@ app.use(URI + '/company', routerCompany);
 //Router by Reservation
 app.use(URI + '/reservation', routerReservation);
 
+app.use(URI + '/middleware', routerMiddleware);
+
 app.listen(port, () => {
     console.log(`===========> Server running on port ${port}`);
 })
+
+//sendMessage('525512300361','Hola esto es una prueba exitosa...');
