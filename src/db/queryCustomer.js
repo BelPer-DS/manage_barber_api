@@ -1,8 +1,9 @@
 export const queryCustomer = {
-    CREATED_CUSTOMER : "insert into customers(name,last_name,alias_name,phone_number, mail, access_code, img_qr) values(?,?,?,?,?,?,?);",
+    CREATED_CUSTOMER : "insert into customers(name,last_name,alias_name,phone_number, mail, access_code, img_qr, status, country_code) values(?,?,?,?,?,?,?,?,?);",
     FIND_BY_PHONE_NUMBER : "select id_customer, name, last_name, alias_name, phone_number, mail from customers where phone_number = ?;",
-    FIND_ACCESS_CODE : "select access_code, id_customer from customers where phone_number = ?;",
+    FIND_ACCESS_CODE : "select access_code, id_customer from customers where phone_number = ? and status = ?;",
     FIND_BY_ID : "select id_customer, name, last_name, alias_name, phone_number, mail from customers where id_customer = ?;",
     CREATED_QR_IMG : "insert into images(title, type, path, status) values (?,?,?,?);",
-    FIND_QR_IMG : "select path from images where id_image = ?;"
+    FIND_QR_IMG : "select path from images where id_image = ?;",
+    ACTIVE_CUSTOMER : "update customers set status = ? where phone_number = ?;"
 } 

@@ -73,52 +73,109 @@ const startingWatsapp = async (req, res) => {
     }
 }
 
-const sendMessage = async(req, res) =>{
+const apiSendMessage = async (req, res) => {
+    const {numberphone, country_code, message} = req.body;
+    await sendMessage(numberphone, country_code, message)
+    .then((response) => {
+        console.log("send ok: ", response);
+        res.status(response.status).json(response);
+        return
+    }).catch((error) => {
+        console.log("send error: ", error);
+        res.status(500).json(error);
+        return
+    });    
+    
+}
+
+const sendMessage = async(numberphone, country_code, message) =>{
     try{
         if(client != null){
             let state = await client.getState();
-            console.log("State connection: ", state);
             if(!state){
-                console.log("State is null: ", state);
-                res.status(400).send("session not available, try again");
-                return
+                //res.status(400).send("session not available, try again");
+                console.log("sendMessage: 400 - session not available, try again");
+                return new Promise((resolve, reject) => {
+                    resolve({
+                        status : 400,
+                        message : "session not available, try again"
+                    });                    
+                })
             }
             
-            const {numberphone, message, country_code} = req.body;
+            //const {numberphone, message, country_code} = req.body;
             if(country_code == null)
                 country_code == "52";
     
             const sanitized_number = numberphone.toString().replace(/[- )(]/g, "");
             const final_number = country_code + sanitized_number.substring(sanitized_number.length - 10);
+            console.log("final_number: ", final_number);
             const number_details = await client.getNumberId(final_number);
     
             if (number_details) {
-                await client.sendMessage(number_details._serialized, message)
-                .then(response => {
-                    res.status(200).send("Mendaje enviado correctamente...");
-                    return
+                const statusSendMessage = await client.sendMessage(number_details._serialized, message);
+                /*.then(response => {
+                    console.log("sendMessage: 200 - Mendaje enviado correctamente...");
+                    return new Promise((resolve, reject) => {
+                        resolve({
+                            status : 200,
+                            message : "Mendaje enviado correctamente..."
+                        });
+                    });
                 })
                 .catch(err => {
-                    res.status(500).send("Error al mandar mensaje: ");
-                    return
-                }); // send message
+                    //res.status(500).send("Error al mandar mensaje: ");
+                    console.log("sendMessage: 500 - Error al mandar mensaje ");
+                    return new Promise((resolve, reject) => {
+                        reject({
+                            status : 500,
+                            message : "Error al mandar mensaje "
+                        });
+                    });    
+                }); // send message*/
+                console.log("SendMessage: ",statusSendMessage);
+                return new Promise((resolve, reject) => {
+                    resolve({
+                        status : 200,
+                        message : "sendMessage"
+                    });
+                });
             } else {               
-                res.status(400).send("Mobile number is not registered");
+                //res.status(400).send("Mobile number is not registered");
+                console.log("sendMessage: 400 - Mobile number is not registered");
+                return new Promise((resolve, reject) => {
+                    resolve({
+                        status : 400,
+                        message : "Mobile number is not registered"
+                    });
+                });                
             }
     
         } else {
-            res.status(400).send("No hay sesiones de whatsapp activas");
-            return
+            //res.status(400).send("No hay sesiones de whatsapp activas");
+            console.log("sendMessage: 400 - No hay sesiones de whatsapp activas");
+            return new Promise((resolve, reject) => {
+                resolve({
+                    status : 400,
+                    message : "No hay sesiones de whatsapp activas"
+                });
+            });            
         }
     }catch(er){
         if(client != null){
             await client.destroy();
             client = null;
         }        
-        console.log(err);
-        res.send(err.message);
+        console.log(er);
+        //res.send(err.message);
+        console.log("sendMessage: 500 - Error al mandar mensaje ");
+        return new Promise((resolve, reject) => {
+            resolve({
+                status : 500,
+                message : "Error al mandar mensaje "
+            });
+        });        
     }
-    
 }
 
-export {sendMessage, startingWatsapp}
+export {sendMessage, startingWatsapp, apiSendMessage}
