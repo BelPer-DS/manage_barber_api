@@ -14,7 +14,7 @@ configDotenv();
 const app = express();
 const port = process.env.PORT || 3000;
 const URI = "/api/barbershop/v1";
-
+app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
@@ -35,8 +35,6 @@ app.use(URI + '/company', routerCompany);
 app.use(URI + '/reservation', routerReservation);
 
 app.use(URI + '/middleware', routerMiddleware);
-
-app.use(cors());
 
 app.listen(port, () => {
     console.log(`===========> Server running on port ${port}`);
