@@ -5,8 +5,8 @@ import { routerCompany } from "../router/routerCompany.js";
 import morgan from 'morgan';
 import { routerReservation } from "../router/routerReservation.js";
 import { configDotenv } from "dotenv";
-import { startingWatsapp,sendMessage } from "../controller/middleware-whatsapp.js";
 import { routerMiddleware } from "../router/routerMiddleware.js";
+import cors from "cors"
 //import qrcode from "qrcode-terminal";
 
 configDotenv();
@@ -35,6 +35,8 @@ app.use(URI + '/company', routerCompany);
 app.use(URI + '/reservation', routerReservation);
 
 app.use(URI + '/middleware', routerMiddleware);
+
+app.use(cors());
 
 app.listen(port, () => {
     console.log(`===========> Server running on port ${port}`);
