@@ -1,6 +1,7 @@
 import pkg from 'whatsapp-web.js';
 const { Client, LocalAuth } = pkg;
 import {generateQr} from "../controller/utilities.js";
+import { httpstatus } from '../enums/http-status.js';
 let client;
 let base64UrlQr;
 let attemps = 0;
@@ -34,7 +35,9 @@ const startingWatsapp = async (req, res) => {
                 base64UrlQr = await generateQr(qr);
                 ++attemps;
                 if(attemps == 1){
-                    res.send(base64UrlQr);                 
+                    let response = httpstatus.S_200_FOUND;
+                    response.data = {code : base64UrlQr};
+                    res.status(200).json(response);                 
                     return
                 }
                 
@@ -42,10 +45,13 @@ const startingWatsapp = async (req, res) => {
             client.initialize();
         } else {
             let state = await client.getState();
+            let response = "";
             console.log("State connection: ", state);
             if(state == null){
                 console.log("In state null: ");
-                res.send(base64UrlQr);
+                response = httpstatus.S_200_FOUND;
+                response.data = {code : base64UrlQr};
+                res.status(200).json(response);
                 return
             } else {                
                 if(attemps >= (maxAttemps-1)){
@@ -54,11 +60,15 @@ const startingWatsapp = async (req, res) => {
                         await client.destroy();
                         client = null;
                         attemps = 0;
-                        res.send("The maximum number of attempts has been reached. Please try again");                
+                        response = httpstatus.S_409_CONFLICT;
+                        response.message = "The maximum number of attempts has been reached. Please try again";
+                        res.status(400).json(response);
                         return
                     }
                 }
-                res.send("The session status is " + state);
+                response = httpstatus.S_409_CONFLICT;
+                response.message = "The session status is " + state;
+                res.status(409).json(response);
                 return
             }    
         }
@@ -69,7 +79,7 @@ const startingWatsapp = async (req, res) => {
             client = null;
         }        
         console.log(err);
-        res.send(err.message)
+        res.status(500).json(httpstatus.S_500_ERROR);
     }
 }
 
@@ -167,7 +177,6 @@ const sendMessage = async(numberphone, country_code, message) =>{
             client = null;
         }        
         console.log(er);
-        //res.send(err.message);
         console.log("sendMessage: 500 - Error al mandar mensaje ");
         return new Promise((resolve, reject) => {
             resolve({
